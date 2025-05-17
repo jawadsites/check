@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدمات التواصل الاجتماعي - اطلب الآن</title>    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/paypal.css">    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js"></script>
+    <script src="js/alpine-data.js"></script>
+    <script src="js/default-platforms.js"></script>
+    <script src="js/platform-integration.js"></script>
+    <script src="js/index-platforms.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f8fafc;
+        }
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .platform-option {
+            transition: all 0.2s ease;
+        }
+        .platform-option:hover {
+            transform: scale(1.05);
+        }
+        .platform-option.active {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .custom-range {
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+        }
+        .custom-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+        }
+        .custom-range::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+        }
+        .gradient-button {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+        }
+        .gradient-button:hover {
+            background: linear-gradient(45deg, #4338ca, #6d28d9);
+        }
+        /* Add success page styles */
+        .success-icon {
+            animation: bounceIn 1s;
+        }
+        @keyframes bounceIn {
+            0%, 20%, 40%, 60%, 80%, 100% {
+                transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+            }
+            0% {
+                opacity: 0;
+                transform: scale3d(.3, .3, .3);
+            }
+            20% {
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+            40% {
+                transform: scale3d(.9, .9, .9);
+            }
+            60% {
+                opacity: 1;
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+            80% {
+                transform: scale3d(.97, .97, .97);
+            }
+            100% {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+        .detail-item {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen" x-data="appData()">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fas fa-hashtag text-3xl mr-3"></i>
+                    <h1 class="text-2xl md:text-3xl font-bold">خدمات التواصل الاجتماعي</h1>
+                </div>                <div class="flex space-x-4 rtl:space-x-reverse">
+                    <label for="currency-select" class="sr-only">العملة</label>
+                    <select id="currency-select" x-model="currency" @change="updatePrice()" class="bg-white bg-opacity-20 text-white border-0 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50" title="اختر العملة">
+                        <option value="USD">دولار أمريكي (USD)</option>
+                        <option value="EUR">يورو (EUR)</option>
+                        <option value="SAR">ريال سعودي (SAR)</option>
+                        <option value="AED">درهم إماراتي (AED)</option>
+                        <option value="KWD">دينار كويتي (KWD)</option>
+                        <option value="QAR">ريال قطري (QAR)</option>
+                        <option value="BHD">دينار بحريني (BHD)</option>
+                        <option value="OMR">ريال عماني (OMR)</option>
+                        <option value="EGP">جنيه مصري (EGP)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-5xl mx-auto">
+            <!-- Step Indicator -->
+            <div class="flex justify-between mb-8">
+                <div class="flex flex-col items-center" :class="{'text-indigo-600': step >= 1, 'text-gray-400': step < 1}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2" :class="{'bg-indigo-600 text-white': step >= 1, 'bg-gray-200': step < 1}">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <span class="text-sm font-medium">اختيار الخدمة</span>
+                </div>
+                <div class="flex-1 border-t-2 border-dashed my-5 mx-4" :class="{'border-indigo-400': step >= 2, 'border-gray-200': step < 2}"></div>
+                <div class="flex flex-col items-center" :class="{'text-indigo-600': step >= 2, 'text-gray-400': step < 2}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2" :class="{'bg-indigo-600 text-white': step >= 2, 'bg-gray-200': step < 2}">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <span class="text-sm font-medium">الدفع</span>
+                </div>
+                <div class="flex-1 border-t-2 border-dashed my-5 mx-4" :class="{'border-indigo-400': step >= 3, 'border-gray-200': step < 3}"></div>
+                <div class="flex flex-col items-center" :class="{'text-indigo-600': step >= 3, 'text-gray-400': step < 3}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2" :class="{'bg-indigo-600 text-white': step >= 3, 'bg-gray-200': step < 3}">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="text-sm font-medium">اكتمال الطلب</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Service Selection -->
+            <div x-show="step === 1" class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">اختر الخدمة</h2>
+                
+                <!-- Service Type Selection -->                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">نوع الخدمة</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <template x-for="(service, type) in services" :key="type">
+                            <div class="service-card border rounded-lg p-4 cursor-pointer" 
+                                 :class="{'border-indigo-500 bg-indigo-50': serviceType === type}"
+                                 @click="serviceType = type; platform = Object.keys(service.platforms)[0] || 'instagram'; updatePrice()">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4"
+                                         :class="getServiceIconClass(type)">
+                                        <i :class="getServiceIcon(type) + ' text-xl'"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-lg" x-text="service.name"></h4>
+                                        <p class="text-gray-500 text-sm" x-text="getServiceDescription(type)"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                
+                <!-- Platform Selection -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">المنصة</h3>
+                    <div id="platforms-list" class="hidden"></div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <template x-for="(plat, name) in availablePlatforms" :key="name">
+                            <div class="platform-option border rounded-lg p-3 flex flex-col items-center cursor-pointer" 
+                                 :class="{'active': platform === name}"
+                                 @click="platform = name; updatePrice()">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2" :class="getPlatformClass(name)">
+                                    <i :class="getPlatformIcon(name) + ' text-xl'"></i>
+                                </div>
+                                <span class="text-sm font-medium" x-text="plat.name"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>                <!-- Quantity Selection -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">الكمية</h3>
+                    <div class="space-y-4">
+                        <select x-model.number="quantity" @change="updatePrice()" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg">
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                            <option value="500">500</option>
+                            <option value="1000" selected>1000</option>
+                            <option value="2000">2000</option>
+                            <option value="3000">3000</option>
+                            <option value="5000">5000</option>
+                            <option value="10000">10000</option>
+                            <option value="20000">20000</option>
+                            <option value="50000">50000</option>
+                        </select>
+                        <div class="flex items-center justify-center">
+                            <div class="bg-gray-100 px-6 py-3 rounded-lg">
+                                <span class="text-2xl font-bold text-indigo-700" x-text="quantity.toLocaleString()"></span>
+                                <span class="text-gray-600 mr-1">وحدة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account URL -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">تفاصيل الطلب</h3>
+                    <div class="mb-4">
+                        <label for="account-url" class="block text-gray-700 mb-2">رابط أو اسم الحساب</label>
+                        <input id="account-url" type="text" x-model="accountUrl" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="مثال: https://instagram.com/username أو @username">
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">ملخص الطلب</h3>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">الخدمة:</span>
+                            <span class="font-medium" x-text="getServiceName()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">المنصة:</span>
+                            <span class="font-medium" x-text="getPlatformName()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">الكمية:</span>
+                            <span class="font-medium" x-text="quantity.toLocaleString()"></span>
+                        </div>
+                        <div class="border-t border-gray-200 my-2 py-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-800 font-semibold">السعر النهائي:</span>
+                                <span class="text-xl font-bold text-indigo-700" x-text="formatPrice(totalPrice)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>                <button @click="goToPayment()" class="gradient-button w-full py-3 px-6 text-white font-bold rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 transition duration-300 text-lg">
+                    متابعة للدفع <i class="fas fa-arrow-left mr-2"></i>
+                </button>
+            </div>
+
+            <!-- المنصات المدعومة -->
+            <div class="bg-gray-50 rounded-xl p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">المنصات المدعومة</h2>
+                <p class="text-center text-gray-600 mb-6">نوفر خدماتنا لأشهر منصات التواصل الاجتماعي في العالم</p>
+                
+                <!-- Platform Filter Buttons -->
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button id="filter-all" class="px-4 py-2 rounded-full bg-blue-600 text-white font-medium text-sm transition hover:bg-blue-700 active">
+                        <i class="fas fa-globe mr-1"></i> جميع المنصات
+                    </button>
+                    <button id="filter-social" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 font-medium text-sm transition hover:bg-gray-300">
+                        <i class="fas fa-share-alt mr-1"></i> تواصل اجتماعي
+                    </button>
+                    <button id="filter-video" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 font-medium text-sm transition hover:bg-gray-300">
+                        <i class="fas fa-video mr-1"></i> منصات الفيديو
+                    </button>
+                    <button id="filter-messaging" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 font-medium text-sm transition hover:bg-gray-300">
+                        <i class="fas fa-comments mr-1"></i> مراسلة
+                    </button>
+                </div>
+                
+                <div id="social-platforms-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- سيتم تحميل المنصات هنا ديناميكياً من خلال نظام إدارة المنصات -->
+                </div>
+            </div>
+
+            <!-- Step 2: Payment -->
+            <div x-show="step === 2" class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">اختر طريقة الدفع</h2>
+                
+                <!-- Order Summary -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">ملخص الطلب</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">الخدمة:</span>
+                            <span class="font-medium" x-text="getServiceName()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">المنصة:</span>
+                            <span class="font-medium" x-text="getPlatformName()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">الكمية:</span>
+                            <span class="font-medium" x-text="quantity.toLocaleString()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">تفاصيل الحساب:</span>
+                            <span class="font-medium" x-text="accountUrl || '-'"></span>
+                        </div>
+                        <div class="border-t border-gray-200 my-2 py-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-800 font-semibold">السعر النهائي:</span>
+                                <span class="text-xl font-bold text-indigo-700" x-text="formatPrice(totalPrice)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>                <!-- Payment Method -->                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">طريقة الدفع</h3>
+                    <div class="rounded-lg p-6 border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-credit-card text-blue-700 text-xl ml-3"></i>
+                            <span class="font-medium text-gray-800">دفع بواسطة بطاقة الائتمان أو PayPal</span>
+                        </div>
+                        <p class="text-gray-600 mb-5 text-sm">يمكنك الدفع مباشرة باستخدام بطاقة الائتمان أو الخصم بدون الحاجة لحساب PayPal</p>
+                          <!-- PayPal Button Container -->
+                        <div id="paypal-button-container" class="mt-3 paypal-rtl-container" style="min-height: 45px; padding: 10px 0; z-index: 10;"></div>
+                        
+                        <!-- Fallback Button (in case PayPal doesn't load) -->
+                        <div id="paypal-fallback" class="mt-3 text-center hidden">
+                            <button onclick="if(window.renderPayPalButton) renderPayPalButton(); else document.getElementById('paypal-button-container').classList.remove('hidden');" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+                                <i class="fab fa-paypal mr-2"></i> دفع عبر PayPal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Customer Information -->
+                <div class="mb-8 border rounded-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700">معلومات العميل</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="customer-name" class="block text-gray-700 mb-2">الاسم الكامل</label>
+                            <input id="customer-name" type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="مثال: محمد أحمد">
+                        </div>
+                        <div>
+                            <label for="customer-email" class="block text-gray-700 mb-2">البريد الإلكتروني</label>
+                            <input id="customer-email" type="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="example@mail.com">
+                        </div>
+                    
+                    </div>
+                </div>
+
+                <div class="flex flex-col-reverse md:flex-row gap-4">
+                    <button @click="step = 1" class="py-3 px-6 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 transition duration-300">
+                        <i class="fas fa-arrow-right ml-2"></i> الرجوع
+                    </button>                    <button @click="handleDirectPayment()" class="gradient-button flex-1 py-3 px-6 text-white font-bold rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 transition duration-300 text-lg">
+                        إتمام الدفع <span class="mr-2" x-text="formatPrice(totalPrice)"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Success Page -->
+            <div x-show="step === 3" class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">تمت عملية الدفع بنجاح</h2>
+                
+                <!-- Success Card -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+                    <!-- Success Header -->
+                    <div class="bg-gradient-to-r from-green-500 to-blue-600 text-white p-6 text-center">
+                        <div class="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 success-icon">
+                            <i class="fas fa-check-circle text-green-500 text-5xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">تمت عملية الدفع بنجاح!</h2>
+                        <p class="text-white opacity-90">شكراً لك. تم استلام طلبك وسيتم معالجته في أقرب وقت ممكن.</p>
+                    </div>
+                    
+                    <!-- Order Details -->
+                    <div id="order-success-details" class="p-6">
+                        <h3 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">تفاصيل الطلب</h3>
+                        <div class="space-y-2">
+                            <div class="detail-item flex justify-between py-2">
+                                <span class="text-gray-600">رقم العملية:</span>
+                                <span id="success-order-id" class="font-medium text-gray-800" x-text="orderId || 'TX983712648'"></span>
+                            </div>
+                            
+                            <div class="detail-item flex justify-between py-2">
+                                <span class="text-gray-600">الخدمة:</span>
+                                <span id="success-service" class="font-medium text-gray-800" x-text="getServiceName() + ' ' + getPlatformName()"></span>
+                            </div>
+                            
+                            <div class="detail-item flex justify-between py-2">
+                                <span class="text-gray-600">الكمية:</span>
+                                <span id="success-quantity" class="font-medium text-gray-800" x-text="quantity.toLocaleString()"></span>
+                            </div>
+                            
+                            <div class="detail-item flex justify-between py-2">
+                                <span class="text-gray-600">المبلغ المدفوع:</span>
+                                <span id="success-amount" class="font-medium text-green-600" x-text="formatPrice(totalPrice)"></span>
+                            </div>
+                            
+                            <div class="detail-item flex justify-between py-2">
+                                <span class="text-gray-600">تاريخ العملية:</span>
+                                <span id="success-date" class="font-medium text-gray-800" x-text="new Date().toLocaleDateString('ar-SA')"></span>
+                            </div>
+                            
+                            <div class="detail-item flex justify-between py-2">
+                                <span class="text-gray-600">طريقة الدفع:</span>
+                                <span class="font-medium text-gray-800">
+                                    <i class="fab fa-cc-visa text-blue-600 mr-1"></i> فيزا
+                                </span>
+                            </div>
+                            
+                            <!-- Removed status field -->
+                            
+                            <div class="flex justify-between py-2">
+                                <span class="text-gray-600">حساب المستخدم:</span>
+                                <span id="success-account" class="font-medium text-gray-800" x-text="accountUrl || '@username'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 sm:space-x-reverse mb-8">
+                    <a href="#" @click.prevent="window.print()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-6 rounded-lg shadow-sm transition duration-150 ease-in-out text-center">
+                        <i class="fas fa-print ml-2"></i> طباعة الإيصال
+                    </a>
+                    <a href="#" @click.prevent="step = 1" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-sm transition duration-150 ease-in-out text-center">
+                        <i class="fas fa-home ml-2"></i> العودة للصفحة الرئيسية
+                    </a>
+                    <a href="dashboard.html" class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg shadow-sm transition duration-150 ease-in-out text-center">
+                        <i class="fas fa-chart-line ml-2"></i> لوحة التحكم
+                    </a>
+                </div>
+                
+                <!-- Additional Information Card -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden p-6 mb-8 text-center">
+                    <h3 class="text-xl font-bold text-gray-700 mb-3">ماذا بعد؟</h3>
+                    <p class="text-gray-600 mb-4">سيتم معالجة طلبك خلال 24 ساعة. يمكنك متابعة حالة طلبك من خلال رقم العملية.</p>                    <div class="flex justify-center space-x-4 space-x-reverse text-2xl">
+                        <a href="#" title="فيسبوك" aria-label="فيسبوك" class="text-blue-500 hover:text-blue-600"><i class="fab fa-facebook"></i></a>
+                        <a href="#" title="انستغرام" aria-label="انستغرام" class="text-pink-500 hover:text-pink-600"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="تويتر" aria-label="تويتر" class="text-blue-400 hover:text-blue-500"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="يوتيوب" aria-label="يوتيوب" class="text-red-500 hover:text-red-600"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">خدمات التواصل الاجتماعي</h3>
+                    <p class="text-gray-400">نقدم خدمات عالية الجودة لتعزيز تواجدك على منصات التواصل الاجتماعي بأسعار منافسة وخدمة دعم ممتازة.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">خدماتنا</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><i class="fas fa-check ml-2"></i> متابعين لجميع المنصات</li>
+                        <li><i class="fas fa-check ml-2"></i> إعجابات ومشاهدات</li>
+                        <li><i class="fas fa-check ml-2"></i> تعليقات وتفاعل</li>
+                        <li><i class="fas fa-check ml-2"></i> دعم 24/7</li>
+                    </ul>
+                </div>                <div>
+                    <h3 class="text-xl font-bold mb-4">وسائل الدفع</h3>
+                    <div class="flex space-x-4 rtl:space-x-reverse">                        
+                        <i class="fab fa-cc-visa text-3xl text-blue-500"></i>
+                        <i class="fab fa-cc-mastercard text-3xl text-red-500"></i>
+                        <i class="fab fa-cc-amex text-3xl text-blue-700"></i>
+                        <i class="fab fa-paypal text-3xl text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>جميع الحقوق محفوظة © 2023 - خدمات التواصل الاجتماعي</p>
+            </div>    </div>
+    </footer>    <!-- تحميل البيانات والخدمات -->    <script src="js/date-fix.js"></script>    <script src="js/format-helpers.js"></script>
+    <script src="js/value-helper.js"></script>
+    <!-- إضافة أدوات التشخيص -->
+    <script src="js/debug.js"></script>
+    <!-- إضافة نظام التهيئة الجديد -->
+    <script src="js/init.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/notifications.js"></script>
+    <!-- نظام إدارة المنصات والخدمات الموحد -->
+    <script src="js/platforms-manager.js"></script>  <!-- نظام إدارة المنصات -->
+    <script src="js/service-utils.js"></script>  <!-- نظام إدارة الخدمات الموحد -->
+    <script src="js/platforms-test.js"></script>   <!-- اختبار نظام المنصات -->
+    <script src="js/social-checkout.js"></script>
+    <script src="js/app-component.js"></script>
+    
+    <!-- PayPal SDK with guest checkout and card support -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AeAK1HSgtUTaOIWew8Hw5Ts-fcAXRJbEkhDsmwUNhoAtThAUFer3s5vXQYnM_GeKGuJhRQ6rMSu_8OzJ&currency=USD&intent=capture&commit=true&components=buttons,funding-eligibility&enable-funding=card"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Migrate platform data to unified storage
+        if (typeof platformUtils !== 'undefined') {
+            console.log('Migrating platform data to unified storage...');
+            platformUtils.migrateOldData();
+            
+            // Validate migration
+            if (typeof platformStorageValidator !== 'undefined') {
+                setTimeout(() => {
+                    platformStorageValidator.displayResults();
+                }, 500);
+            }
+        }
+        
+        // Render PayPal button with improved handling
+        function renderPayPalButton() {
+            if (!window.paypal) {
+                // If PayPal SDK is not loaded yet, try again in 200ms
+                setTimeout(renderPayPalButton, 200);
+                // Show fallback button if needed
+                document.getElementById('paypal-fallback').classList.remove('hidden');
+                return;
+            }
+            
+            // Hide fallback button once SDK is loaded
+            document.getElementById('paypal-fallback').classList.add('hidden');
+            
+            // Clear any previous buttons
+            var container = document.getElementById('paypal-button-container');
+            if (container) container.innerHTML = '';
+            
+            paypal.Buttons({
+                style: {
+                    layout: 'vertical',
+                    color: 'blue',
+                    shape: 'pill',
+                    label: 'pay',
+                    height: 45
+                },
+                // Show all available funding sources (PayPal, Credit/Debit cards)
+                fundingSource: undefined,
+                
+                // Create the order with the current price
+                createOrder: function(data, actions) {
+                    // Get price from Alpine.js component or global variable
+                    var price = 0;
+                    if (window.Alpine && document.querySelector('[x-data]')) {
+                        // Try to get price from Alpine.js component
+                        var alpineComponent = Alpine.closestDataStack(document.querySelector('[x-data]'));
+                        if (alpineComponent && alpineComponent.totalPrice !== undefined) {
+                            price = typeof alpineComponent.totalPrice === 'function' 
+                                ? alpineComponent.totalPrice() 
+                                : alpineComponent.totalPrice;
+                        }
+                    } 
+                    
+                    // Fallback to global variable if Alpine.js component not available
+                    if (price <= 0 && window.totalPrice !== undefined) {
+                        price = typeof window.totalPrice === 'function' 
+                            ? window.totalPrice() 
+                            : window.totalPrice;
+                    }
+                    
+                    // Ensure minimum price and format correctly
+                    if (!price || isNaN(price) || price < 1) price = 1.00;
+                    
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { 
+                                value: price.toFixed(2),
+                                currency_code: 'USD'
+                            }
+                        }],
+                        application_context: {
+                            shipping_preference: 'NO_SHIPPING'
+                        }
+                    });
+                },
+                  // Handle successful payment
+                onApprove: function(data, actions) {
+                    // Show loading indicator
+                    container.innerHTML = '<div class="text-center py-3"><i class="fas fa-spinner fa-spin text-blue-600 text-2xl"></i><p class="mt-2 text-gray-600">جاري إتمام عملية الدفع...</p></div>';
+                    
+                    return actions.order.capture().then(function(details) {
+                        // Get customer information
+                        const payerName = details.payer.name 
+                            ? (details.payer.name.given_name || details.payer.name.surname || 'عميلنا العزيز')
+                            : 'عميلنا العزيز';
+                        
+                        // Get transaction information
+                        const transactionId = details.id;
+                        const transactionAmount = details.purchase_units[0].amount.value;
+                        
+                        // Save order details if needed
+                        if (window.Alpine) {
+                            var alpineComponent = Alpine.closestDataStack(document.querySelector('[x-data]'));
+                            if (alpineComponent && typeof alpineComponent.saveOrderToLocalStorage === 'function') {
+                                // Update customer name from PayPal if available
+                                const nameInput = document.getElementById('customer-name');
+                                if (nameInput && !nameInput.value && details.payer.name) {
+                                    nameInput.value = `${details.payer.name.given_name || ''} ${details.payer.name.surname || ''}`.trim();
+                                }
+                                
+                                // Save order details to Alpine.js component
+                                alpineComponent.orderId = transactionId;
+                                
+                                // Save order with transaction details
+                                alpineComponent.saveOrderToLocalStorage();
+                            }
+                        }
+                        
+                        // Show success message
+                        showSuccessMessage(payerName, transactionId, transactionAmount);
+                        
+                        // Move to success step
+                        setTimeout(() => {
+                            if (window.Alpine) {
+                                var alpineComponent = Alpine.closestDataStack(document.querySelector('[x-data]'));
+                                if (alpineComponent) {
+                                    alpineComponent.step = 3;
+                                }
+                            }
+                        }, 1000);
+                    });
+                },
+                
+                // Handle payment errors
+                onError: function(err) {
+                    console.error('PayPal Error:', err);
+                    alert('حدث خطأ أثناء عملية الدفع. يرجى المحاولة مرة أخرى.');
+                    renderPayPalButton(); // Re-render the button
+                }
+            }).render('#paypal-button-container');
+        }
+        
+        // Show a success message after payment
+        function showSuccessMessage(name, transactionId, amount) {
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="text-center py-4 px-2 bg-green-50 rounded-lg border border-green-200">
+                        <i class="fas fa-check-circle text-green-500 text-3xl mb-2"></i>
+                        <h3 class="text-green-800 font-bold text-lg mb-1">تم الدفع بنجاح!</h3>
+                        <p class="text-gray-700 mb-1">شكراً لك، ${name}</p>
+                        <p class="text-gray-600 text-sm">رقم العملية: ${transactionId}</p>
+                        <p class="text-gray-600 text-sm">المبلغ: $${amount} USD</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize PayPal button
+        window.renderPayPalButton = renderPayPalButton;
+        
+        // Render button either on payment step or immediately
+        if (typeof step !== 'undefined') {
+            var stepHandler = setInterval(function() {
+                if (typeof step !== 'undefined' && step === 2) {
+                    renderPayPalButton();
+                    clearInterval(stepHandler);
+                }
+            }, 200);
+        } else {
+            renderPayPalButton();
+        }    });    </script>
+</body>
+</html>
+

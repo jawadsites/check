@@ -1,0 +1,8 @@
+/* ...existing code... */
+
+/* Keep only used and effective rules */
+.used-class {
+    color: green;
+}
+
+/* ...existing code... */

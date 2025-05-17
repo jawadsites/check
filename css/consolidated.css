@@ -1,0 +1,37 @@
+/* Content from style1.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #333;
+}
+
+/* Content from style2.css */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+/* Content from style3.css */
+.footer {
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px;
+}
+
+.footer p {
+    margin: 0;
+    color: #666;
+}
